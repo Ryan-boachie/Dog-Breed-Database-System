@@ -1,0 +1,136 @@
+SQL Table Creation 
+The following SQL records were used to create the database table according to the design of the system created. 
+Members Table
+CREATE TABLE Members ( Member_ID INT PRIMARY KEY, First_Name VARCHAR(50), Last_Name VARCHAR(50), Address VARCHAR(255), Contact_Number VARCHAR(20), Email VARCHAR(100), Date_of_Birth DATE, Membership_Level VARCHAR(255), Interests VARCHAR(255) );
+Staff Table
+CREATE TABLE Staff ( Staff_ID INT PRIMARY KEY, First_Name VARCHAR(255), Last_Name VARCHAR(255), Role VARCHAR(255), Contact_Number VARCHAR(255), Email VARCHAR(255) );
+
+Project Table
+CREATE TABLE Projects ( Project_Code VARCHAR(10) PRIMARY KEY, Project_Title VARCHAR(100), Description TEXT, Schedule_Date DATETIME, Maximum_Participants INT, Staff_ID INT, FOREIGN KEY (Staff_ID) REFERENCES Staff(Staff_ID) );
+
+Bookings Table
+CREATE TABLE Bookings ( Booking_ID INT PRIMARY KEY, Member_ID INT, Project_Code VARCHAR(10), Booking_Date DATETIME, Booking_Status VARCHAR(20), FOREIGN KEY (Member_ID) REFERENCES Members(Member_ID), FOREIGN KEY (Project_Code) REFERENCES Projects(Project_Code) );
+
+Payment Table
+CREATE TABLE Payments ( Payment_ID INT PRIMARY KEY, Member_ID INT, Payment_Date DATE, Amount_Paid DECIMAL(10,2), Payment_Method VARCHAR(50), FOREIGN KEY (Member_ID) REFERENCES Members(Member_ID) );
+Feedback Table
+CREATE TABLE Feedback ( Feedback_ID INT PRIMARY KEY, Member_ID INT, Project_Code VARCHAR(10), Rating INT, Comments TEXT, Feedback_Date DATE, FOREIGN KEY (Member_ID) REFERENCES Members(Member_ID), FOREIGN KEY (Project_Code) REFERENCES Projects(Project_Code) );
+
+Sample Data Insertion 
+Sample data was also inserted into the tables to test the functions of the system. 
+Example Member data
+INSERT INTO Members
+VALUES
+(101, 'Sarah', 'Johnson', '12 Green Road',
+'07123456789', 'sarah@email.com',
+'1998-03-14', 'Gold',
+'Dog welfare and conservation');
+
+Example Staff Data
+INSERT INTO Staff
+VALUES
+(201, 'Michael', 'Smith',
+'Animal Welfare Trainer',
+'07987654321',
+'michael@greenfutures.org');
+
+Example Project Data 
+INSERT INTO Projects
+VALUES
+('P101', 'Responsible Dog Ownership Workshop',
+'Educational workshop promoting ethical dog ownership',
+'2026-06-10 10:00:00',
+30,
+201);
+
+Example Booking Data 
+INSERT INTO Bookings
+VALUES
+(301, 101, 'P101',
+'2026-05-14 14:30:00',
+'Confirmed');
+
+Example SQL Queries 
+The following queries is the part that showed the important system functions 
+Display Current Project Registrations by a Member
+SELECT Members.First_Name,
+Projects.Project_Title,
+Bookings.Booking_Date
+FROM Bookings
+JOIN Members
+ON Bookings.Member_ID = Members.Member_ID
+JOIN Projects
+ON Bookings.Project_Code = Projects.Project_Code
+WHERE Members.Member_ID = 101;
+
+Search for Projects Led by a Specific Staff Member
+SELECT Staff.First_Name,
+Projects.Project_Title,
+Projects.Schedule_Date
+FROM Projects
+JOIN Staff
+ON Projects.Staff_ID = Staff.Staff_ID
+WHERE Staff.Staff_ID = 201;
+
+List Most Active Members Monthly
+SELECT Members.First_Name,
+COUNT(Bookings.Booking_ID) AS Total_Bookings
+FROM Bookings
+JOIN Members
+ON Bookings.Member_ID = Members.Member_ID
+GROUP BY Members.Member_ID
+ORDER BY Total_Bookings DESC;
+
+Booking Constraints Implementation 
+Part of the system design was to enforce booking limitations based on membership level requirements. These constraints were as followed.  
+•	Basic members can book up to 3 free projects monthly 
+•	Silver members can book up to 4 free projects monthly 
+•	Gold members can book up to 5 free projects monthly
+And any additional bookings may require payments before confirmation. These limitations help ensure fair and equal participation and prevent overbooking projects. 
+
+Test case 1: Insert a New Member 
+Purpose 
+To verify that the new members can be successfully added to the database.
+SQL Statement 
+INSERT INTO Members
+VALUES
+(102, 'James', 'Walker',
+'25 Park Lane',
+'07000111222',
+'james@email.com',
+'1995-08-10',
+'Silver',
+'Dog breed education');
+Expected Result
+The new record for member should be successfully into members table without errors. 
+Actual Result
+The member information was successfully added to the database. 
+Test Case 2: Book a Project
+Purpose
+To confirm that a member can successfully book a project.
+SQL Statement
+INSERT INTO Bookings
+VALUES
+(302, 102, 'P101',
+'2026-05-20 11:00:00',
+'Confirmed');
+Expected Result
+The booking should be recorded successfully as long as the member and project exist in the database.
+Actual Result
+The booking was successfully inserted into the Bookings table.
+Test Case 3: Check Member Attendance and Participation
+Purpose
+To verify that staff can track member participation within projects.
+SQL Statement
+SELECT Members.First_Name,
+Projects.Project_Title,
+Bookings.Booking_Status
+FROM Bookings
+JOIN Members
+ON Bookings.Member_ID = Members.Member_ID
+JOIN Projects
+ON Bookings.Project_Code = Projects.Project_Code;
+Expected Result
+The system should display  all member bookings and participation records.
+Actual Result
+The query successfully displayed participation information for registered members
